@@ -1,5 +1,6 @@
+
 import 'package:flutter/material.dart';
-import 'screen/home_screen.dart';
+import 'screen/teacher_home_screen.dart';
 
 void main() {
   runApp(const EduBridgeApp());
@@ -13,7 +14,7 @@ class EduBridgeApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'EduBridge',
-      home: const HomeScreen(),
+      home: const TeacherHomeScreen(),
     );
   }
 }

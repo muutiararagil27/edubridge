@@ -13,20 +13,13 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 430,
-            ),
+            constraints: const BoxConstraints(maxWidth: 430),
             child: Column(
               children: [
                 // HEADER
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(
-                    20,
-                    25,
-                    20,
-                    25,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 25, 20, 25),
                   decoration: const BoxDecoration(
                     color: Color(0xFF3155D9),
                     borderRadius: BorderRadius.only(
@@ -57,7 +50,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
 
-                // ISI
+                // ISI DASHBOARD
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(18),
@@ -73,7 +66,7 @@ class HomeScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                Colors.blue.withValues(alpha: 0.1),
+                                color: Colors.blue.withValues(alpha: 0.1),
                                 blurRadius: 10,
                               ),
                             ],
@@ -94,26 +87,27 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 15),
-                              const Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Ananda',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Ananda',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(height: 5),
-                                  Text(
-                                    'Kelas XI • Teknik Komputer dan Jaringan',
-                                    style: TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 12,
+                                    SizedBox(height: 5),
+                                    Text(
+                                      'Kelas XI • Teknik Komputer dan Jaringan',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -121,7 +115,7 @@ class HomeScreen extends StatelessWidget {
 
                         const SizedBox(height: 22),
 
-                        // Perkembangan Belajar
+                        // PERKEMBANGAN BELAJAR
                         const Text(
                           'Perkembangan Belajar',
                           style: TextStyle(
@@ -166,7 +160,7 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 15),
 
                         // PROGRESS AKADEMIK
-                        _ProgressCard(
+                        const _ProgressCard(
                           title: 'Akademik',
                           value: '87%',
                           progress: 0.87,
@@ -175,7 +169,7 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 12),
 
                         // PROGRESS PRAKTIK
-                        _ProgressCard(
+                        const _ProgressCard(
                           title: 'Praktik',
                           value: '80%',
                           progress: 0.80,
@@ -212,7 +206,8 @@ class HomeScreen extends StatelessWidget {
                               ),
                               SizedBox(height: 12),
                               Text(
-                                'Ananda menunjukkan perkembangan yang baik dalam pembelajaran minggu ini.',
+                                'Ananda menunjukkan perkembangan yang baik '
+                                'dalam pembelajaran minggu ini.',
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontSize: 13,
@@ -234,7 +229,7 @@ class HomeScreen extends StatelessWidget {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
+                        color: Colors.blue.withValues(alpha: 0.1),
                         blurRadius: 10,
                       ),
                     ],
@@ -248,7 +243,6 @@ class HomeScreen extends StatelessWidget {
                         active: true,
                         onTap: () {},
                       ),
-
                       _NavItem(
                         icon: Icons.assessment_outlined,
                         label: 'Report',
@@ -256,13 +250,11 @@ class HomeScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const ReportScreen(),
+                              builder: (context) => const ReportScreen(),
                             ),
                           );
                         },
                       ),
-
                       _NavItem(
                         icon: Icons.chat_bubble_outline,
                         label: 'Chat',
@@ -270,13 +262,11 @@ class HomeScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const ChatScreen(),
+                              builder: (context) => const ChatScreen(),
                             ),
                           );
                         },
                       ),
-
                       _NavItem(
                         icon: Icons.person_outline,
                         label: 'Profil',
@@ -284,8 +274,7 @@ class HomeScreen extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const ProfileScreen(),
+                              builder: (context) => const ProfileScreen(),
                             ),
                           );
                         },
@@ -301,7 +290,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
 
 // =========================
 // STAT CARD
@@ -354,7 +342,6 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
-
 
 // =========================
 // PROGRESS CARD
@@ -418,7 +405,6 @@ class _ProgressCard extends StatelessWidget {
   }
 }
 
-
 // =========================
 // BOTTOM NAV ITEM
 // =========================
@@ -451,21 +437,15 @@ class _NavItem extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: active
-                  ? const Color(0xFF3155D9)
-                  : Colors.grey,
+              color: active ? const Color(0xFF3155D9) : Colors.grey,
             ),
             const SizedBox(height: 3),
             Text(
               label,
               style: TextStyle(
                 fontSize: 10,
-                color: active
-                    ? const Color(0xFF3155D9)
-                    : Colors.grey,
-                fontWeight: active
-                    ? FontWeight.bold
-                    : FontWeight.normal,
+                color: active ? const Color(0xFF3155D9) : Colors.grey,
+                fontWeight: active ? FontWeight.bold : FontWeight.normal,
               ),
             ),
           ],

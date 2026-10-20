@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'grade_input_screen.dart';
 
 class TeacherHomeScreen extends StatelessWidget {
   const TeacherHomeScreen({super.key});
@@ -240,18 +241,27 @@ class TeacherHomeScreen extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
         ),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '$title belum tersedia.',
+          if (title == 'Input Nilai Siswa') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const GradeInputScreen(),
               ),
-            ),
-          );
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('$title belum tersedia.'),
+              ),
+            );
+          }
         },
       ),
     );

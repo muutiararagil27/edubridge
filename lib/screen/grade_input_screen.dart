@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GradeInputScreen extends StatefulWidget {
   const GradeInputScreen({super.key});
@@ -15,6 +15,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   final _gradeController = TextEditingController();
 
   String _selectedClass = 'PTI 24 A';
+  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -24,32 +25,62 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     super.dispose();
   }
 
-  void _saveGrade() {
+  Future<void> _saveGrade() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final name = _nameController.text.trim();
-    final subject = _subjectController.text.trim();
-    final grade = double.parse(_gradeController.text.trim());
+    setState(() {
+      _isSaving = true;
+    });
 
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Nilai Berhasil Diinput'),
-        content: Text(
-          'Nama: $name\n'
-          'Kelas: $_selectedClass\n'
-          'Mata Pelajaran: $subject\n'
-          'Nilai: $grade\n\n'
-          'Catatan: data ini belum disimpan ke database.',
+    try {
+      final name = _nameController.text.trim();
+      final subject = _subjectController.text.trim();
+      final grade = double.parse(_gradeController.text.trim());
+
+      // Simpan data nilai ke Firebase Firestore.
+      await FirebaseFirestore.instance.collection('nilai_siswa').add({
+        'nama_siswa': name,
+        'kelas': _selectedClass,
+        'mata_pelajaran': subject,
+        'nilai': grade,
+        'waktu_dibuat': FieldValue.serverTimestamp(),
+      });
+
+      if (!mounted) return;
+
+      // Tampilkan pemberitahuan jika penyimpanan berhasil.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nilai siswa berhasil disimpan ke Firebase!'),
+          backgroundColor: Colors.green,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup'),
-          ),
-        ],
-      ),
-    );
+      );
+
+      // Kosongkan formulir setelah berhasil disimpan.
+      _nameController.clear();
+      _subjectController.clear();
+      _gradeController.clear();
+
+      setState(() {
+        _selectedClass = 'PTI 24 A';
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menyimpan nilai: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 6),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
+    }
   }
 
   @override
@@ -80,16 +111,21 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                 style: TextStyle(color: Colors.black54),
               ),
               const SizedBox(height: 24),
+
               _buildLabel('Nama Siswa'),
               TextFormField(
                 controller: _nameController,
                 decoration: _decoration('Masukkan nama siswa'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Nama siswa wajib diisi'
-                        : null,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Nama siswa wajib diisi';
+                  }
+                  return null;
+                },
               ),
+
               const SizedBox(height: 18),
+
               _buildLabel('Kelas'),
               DropdownButtonFormField<String>(
                 value: _selectedClass,
@@ -108,23 +144,33 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     child: Text('PTI 24 C'),
                   ),
                 ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _selectedClass = value);
-                  }
-                },
+                onChanged: _isSaving
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() {
+                            _selectedClass = value;
+                          });
+                        }
+                      },
               ),
+
               const SizedBox(height: 18),
+
               _buildLabel('Mata Pelajaran'),
               TextFormField(
                 controller: _subjectController,
                 decoration: _decoration('Masukkan mata pelajaran'),
-                validator: (value) =>
-                    value == null || value.trim().isEmpty
-                        ? 'Mata pelajaran wajib diisi'
-                        : null,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Mata pelajaran wajib diisi';
+                  }
+                  return null;
+                },
               ),
+
               const SizedBox(height: 18),
+
               _buildLabel('Nilai (0–100)'),
               TextFormField(
                 controller: _gradeController,
@@ -134,20 +180,38 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                 decoration: _decoration('Contoh: 85'),
                 validator: (value) {
                   final grade = double.tryParse(value?.trim() ?? '');
-                  if (grade == null) return 'Masukkan nilai yang valid';
+
+                  if (grade == null) {
+                    return 'Masukkan nilai yang valid';
+                  }
+
                   if (grade < 0 || grade > 100) {
                     return 'Nilai harus antara 0 sampai 100';
                   }
+
                   return null;
                 },
               ),
+
               const SizedBox(height: 28),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: _saveGrade,
-                  icon: const Icon(Icons.save_outlined),
-                  label: const Text('Simpan Nilai'),
+                  onPressed: _isSaving ? null : _saveGrade,
+                  icon: _isSaving
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.save_outlined),
+                  label: Text(
+                    _isSaving ? 'Menyimpan...' : 'Simpan Nilai',
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2457C5),
                     foregroundColor: Colors.white,
@@ -185,7 +249,9 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE0E5EE)),
+        borderSide: const BorderSide(
+          color: Color(0xFFE0E5EE),
+        ),
       ),
     );
   }

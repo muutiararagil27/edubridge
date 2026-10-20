@@ -128,7 +128,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
 
               _buildLabel('Kelas'),
               DropdownButtonFormField<String>(
-                value: _selectedClass,
+                initialValue: _selectedClass,
                 decoration: _decoration('Pilih kelas'),
                 items: const [
                   DropdownMenuItem(

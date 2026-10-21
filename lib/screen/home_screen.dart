@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
 import 'package:flutter/material.dart';
 import 'report_screen.dart';
 import 'chat_screen.dart';
@@ -16,7 +18,7 @@ class HomeScreen extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 430),
             child: Column(
               children: [
-                // HEADER
+                // HEADER DENGAN TOMBOL LOGOUT
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.fromLTRB(20, 25, 20, 25),
@@ -27,24 +29,49 @@ class HomeScreen extends StatelessWidget {
                       bottomRight: Radius.circular(25),
                     ),
                   ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        'Halo, Orang Tua 👋',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Halo, Orang Tua 👋',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'Pantau perkembangan belajar Ananda',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(height: 6),
-                      Text(
-                        'Pantau perkembangan belajar Ananda',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 14,
+                      // Tombol Logout di Pojok Kanan Atas
+                      IconButton(
+                        icon: const Icon(
+                          Icons.logout_rounded,
+                          color: Colors.white,
+                          size: 26,
                         ),
+                        tooltip: 'Keluar',
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          if (!context.mounted) return;
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -137,7 +164,7 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 15),
 
                         // NILAI DAN KEHADIRAN
-                        Row(
+                        const Row(
                           children: [
                             Expanded(
                               child: _StatCard(
@@ -146,7 +173,7 @@ class HomeScreen extends StatelessWidget {
                                 value: '87',
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12),
                             Expanded(
                               child: _StatCard(
                                 icon: Icons.calendar_today_outlined,

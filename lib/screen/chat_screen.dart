@@ -173,7 +173,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       hintText: 'Ketik pesan...',
                       filled: true,
                       fillColor: const Color(0xFFF5F7FB),
-                      contentPadding: const EdgeInsets.horizontal(16, vertical: 12),
+                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
                         borderSide: BorderSide.none,

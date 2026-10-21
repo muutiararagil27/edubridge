@@ -37,13 +37,15 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       final subject = _subjectController.text.trim();
       final grade = double.parse(_gradeController.text.trim());
 
-      // Simpan data nilai ke Firebase Firestore.
-      await FirebaseFirestore.instance.collection('nilai_siswa').add({
-        'nama_siswa': name,
-        'kelas': _selectedClass,
-        'mata_pelajaran': subject,
-        'nilai': grade,
-        'waktu_dibuat': FieldValue.serverTimestamp(),
+      // Sesuai SRD Bab 3.6.4 (Struktur Data Koleksi Nilai)
+      await FirebaseFirestore.instance.collection('Nilai').add({
+        'siswaId': name, // Sementara menggunakan nama sebagai ID agar mudah dites
+        'guruId': 'guru_terlogin', // Nanti disesuaikan dengan ID sesi guru
+        'mataPelajaran': subject,
+        'jenisPenilaian': 'Tugas/Ujian', // Bisa Anda kembangkan dengan Dropdown baru
+        'Nilai': grade, // Rentang 0-100
+        'Tanggal': FieldValue.serverTimestamp(),
+        'keterangan': 'Input dari kelas $_selectedClass',
       });
 
       if (!mounted) return;

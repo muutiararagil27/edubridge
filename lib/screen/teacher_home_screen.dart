@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
 import 'grade_input_screen.dart';
 import 'attendance_input_screen.dart';
 import 'report_screen.dart';
@@ -22,11 +24,16 @@ class TeacherHomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.notifications_none,
-              color: Colors.black87,
-            ),
+            icon: const Icon(Icons.logout, color: Colors.red),
+            tooltip: 'Keluar',
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              if (!context.mounted) return;
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+            },
           ),
           const SizedBox(width: 8),
         ],

@@ -49,18 +49,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      if (userDoc.exists) {
-        String role = userDoc.get('role') ?? 'Guru';
+      if (userDoc.exists && userDoc.data() != null) {
+        Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
+        String role = (data['role'] ?? '').toString().trim().toLowerCase();
 
-        // 3. Navigasi otomatis sesuai Role
-        if (role == 'Guru') {
+        // 3. Navigasi fleksibel sesuai Role
+        if (role.contains('guru')) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => const TeacherHomeScreen(),
             ),
           );
-        } else if (role == 'Orang Tua') {
+        } else if (role.contains('orang') || role.contains('ortu')) {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -69,15 +70,21 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Role akun tidak terdaftar.')),
+            SnackBar(
+              content: Text('Role akun "$role" tidak dikenali.'),
+              backgroundColor: Colors.orange,
+            ),
           );
         }
       } else {
-        // Jika dokumen Users belum diset, default ke Dashboard Guru sementara
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const TeacherHomeScreen(),
+        // Jika dokumen Users belum dibuat di Firestore
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Dokumen profil tidak ditemukan di Firestore! Pastikan Document ID di koleksi Users diset menggunakan User UID.',
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
           ),
         );
       }

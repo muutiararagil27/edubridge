@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'teacher_home_screen.dart';
-import 'report_screen.dart';
+import 'parent_home_screen.dart'; // Diubah dari report_screen.dart ke parent_home_screen.dart
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -65,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const ReportScreen(),
+              builder: (context) => const ParentHomeScreen(), // Diubah ke ParentHomeScreen
             ),
           );
         } else {

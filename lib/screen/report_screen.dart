@@ -14,7 +14,7 @@ class ReportScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: const Text(
-          'Weekly Report',
+          'Laporan Mingguan', // Sudah diubah ke Bahasa Indonesia
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
@@ -35,7 +35,7 @@ class ReportScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // --- RINGKASAN STATIS (Sesuai UI asli Anda) ---
+          // --- RINGKASAN STATIS ---
           _reportCard(
             icon: Icons.school_rounded,
             title: 'Nilai Akademik',
@@ -65,18 +65,14 @@ class ReportScreen extends StatelessWidget {
           StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('Nilai')
-                // Menampilkan nilai khusus untuk anak ini (berdasarkan field siswaId yang diinput Guru)
-                // Hapus baris .where() di bawah jika Anda ingin melihat semua data yang masuk tanpa filter
                 .where('siswaId', isEqualTo: namaSiswaTest)
-                .orderBy('Tanggal', descending: true) // Urutkan dari yang paling baru
+                .orderBy('Tanggal', descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
-              // Jika masih proses memuat data
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              // Jika terjadi error (misalnya aturan keamanan Firebase memblokir)
               if (snapshot.hasError) {
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -91,7 +87,6 @@ class ReportScreen extends StatelessWidget {
                 );
               }
 
-              // Jika data kosong
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return Container(
                   padding: const EdgeInsets.all(16),
@@ -105,12 +100,11 @@ class ReportScreen extends StatelessWidget {
                 );
               }
 
-              // Jika data berhasil diambil, tampilkan dalam bentuk list
               var daftarNilai = snapshot.data!.docs;
 
               return ListView.builder(
-                shrinkWrap: true, // Wajib agar ListView bisa berada di dalam ListView utama
-                physics: const NeverScrollableScrollPhysics(), // Scroll mengikuti ListView utama
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: daftarNilai.length,
                 itemBuilder: (context, index) {
                   var data = daftarNilai[index].data() as Map<String, dynamic>;
@@ -133,7 +127,6 @@ class ReportScreen extends StatelessWidget {
     );
   }
 
-  // Widget _reportCard tidak diubah, tetap sama seperti desain asli Anda
   Widget _reportCard({
     required IconData icon,
     required String title,

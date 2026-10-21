@@ -1,6 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'grade_input_screen.dart';
+import 'attendance_input_screen.dart';
+import 'report_screen.dart';
 
 class TeacherHomeScreen extends StatelessWidget {
   const TeacherHomeScreen({super.key});
@@ -253,6 +254,20 @@ class TeacherHomeScreen extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => const GradeInputScreen(),
+              ),
+            );
+          } else if (title == 'Kehadiran Siswa') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AttendanceInputScreen(),
+              ),
+            );
+          } else if (title == 'Laporan Siswa') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ReportScreen(),
               ),
             );
           } else {

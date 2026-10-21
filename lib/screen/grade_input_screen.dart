@@ -10,11 +10,11 @@ class GradeInputScreen extends StatefulWidget {
 
 class _GradeInputScreenState extends State<GradeInputScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _studentController = TextEditingController();
   final TextEditingController _subjectController = TextEditingController();
   final TextEditingController _scoreController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
-  String _selectedStudent = 'Andi Pratama';
   bool _isLoading = false;
 
   Future<void> _saveGrade() async {
@@ -24,7 +24,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
 
     try {
       await FirebaseFirestore.instance.collection('Nilai').add({
-        'siswaId': _selectedStudent,
+        'siswaId': _studentController.text.trim(),
         'mataPelajaran': _subjectController.text.trim(),
         'nilai': int.parse(_scoreController.text.trim()),
         'catatan': _noteController.text.trim(),
@@ -40,9 +40,8 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
         ),
       );
 
-      _subjectController.clear();
-      _scoreController.clear();
-      _noteController.clear();
+      // Otomatis kembali ke Dashboard Guru setelah berhasil simpan
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,6 +57,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
 
   @override
   void dispose() {
+    _studentController.dispose();
     _subjectController.dispose();
     _scoreController.dispose();
     _noteController.dispose();
@@ -73,6 +73,10 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
           'Input Nilai Siswa',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context), // Kembali ke Dashboard Guru
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -85,28 +89,22 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Pilih Siswa',
+                'Nama Siswa',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: _selectedStudent,
+              TextFormField(
+                controller: _studentController,
                 decoration: InputDecoration(
+                  hintText: 'Contoh: Budi Santoso',
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'Andi Pratama',
-                    child: Text('Andi Pratama'),
-                  ),
-                ],
-                onChanged: (val) {
-                  if (val != null) setState(() => _selectedStudent = val);
-                },
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Nama siswa wajib diisi' : null,
               ),
               const SizedBox(height: 16),
               const Text(

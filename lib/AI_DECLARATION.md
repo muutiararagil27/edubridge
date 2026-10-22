@@ -1,30 +1,29 @@
-# Deklarasi Penggunaan AI (AI Declaration) - EduBridge
+# Catatan Penggunaan AI & Transparansi Proyek - EduBridge
 
-Dokumen ini disusun sebagai bentuk transparansi penggunaan teknologi *Artificial Intelligence* (AI) dalam pengembangan proyek aplikasi UTS **EduBridge**.
+Dokumen ini saya buat untuk menjelaskan bagaimana saya memanfaatkan bantuan teknologi *Artificial Intelligence* (AI) selama proses ngoding dan pengerjaan aplikasi UTS **EduBridge** ini.
 
-## 1. Daftar Alat (AI Tools) yang Digunakan
-* **Gemini (Google)**: Digunakan sebagai kolaborator utama untuk membantu perancangan struktur kode UI, logika state management Flutter, serta integrasi Cloud Firestore.
-* **GitHub Copilot / VS Code AI Extension**: Digunakan untuk melengkapi baris kode (*autocompletion*) secara cepat.
+## 1. Tool AI yang Saya Pakai
+* **Gemini (Google)**: Saya pakai sebagai teman diskusi utama buat ngebantu nyusun struktur UI Flutter, nulis logika dasar *state management*, dan nyambungin ke Cloud Firestore.
+* **VS Code AI/Copilot**: Sesekali dipakai buat *autocompletion* baris kode biar lebih cepat.
 
-## 2. Pembagian Peran (AI vs Manual)
-* **Modul yang Dibantu AI**:
-  * Perancangan kerangka dasar UI/UX untuk *Dashboard Guru* dan *Dashboard Orang Tua*.
-  * Pembuatan struktur kode boilerplate untuk *ListView.builder*, *Card*, dan *StreamBuilder* Firebase.
-  * Penulisan fungsi logika *batch commit* pada fitur absensi massal.
-* **Modul yang Murni Ditulis/Disesuaikan Manual**:
-  * Penyesuaian data 10 siswa spesifik kelas XI-A3 beserta NIS masing-masing sesuai kebutuhan studi kasus.
-  * Penataan alur navigasi (`BottomNavigationBar`) serta penyesuaian teks dan *routing* halaman detail informasi akademik.
-  * Proses pengujian (*testing*), *debugging* error, dan penyesuaian *state* aplikasi secara langsung di lingkungan lokal.
+## 2. Bagian Mana yang Dibantu AI vs Dikerjakan Sendiri?
+* **Bagian yang Dibantu AI**:
+  * Bikin kerangka awal atau *boilerplate code* untuk tampilan *Card*, *ListView*, dan struktur dasar halaman dashboard guru & orang tua.
+  * Ngebantu nulis logika *batch commit* buat fitur absensi massal di Firebase biar lebih efisien.
+* **Bagian yang Saya Kerjakan & Sesuaikan Sendiri**:
+  * Nyesuaiin daftar 10 nama siswa dan NIS kelas XI-A3 secara spesifik sesuai studi kasus.
+  * Ngerapihin navigasi tombol (`BottomNavigationBar`) dan routing halaman detail akademik biar pas diklik datanya beneran muncul sesuai akun.
+  * Proses *debugging*, benerin error kodingan, *testing* langsung di emulator/browser, dan *push* commit secara berkala ke GitHub.
 
-## 3. Studi Kasus Prompting (Contoh Instruksi dan Penyesuaian)
-Berikut adalah contoh riwayat instruksi (*prompting*) dan penyesuaian logika manual yang dilakukan agar aplikasi berjalan stabil:
+## 3. Contoh Proses Tanya Jawab (Prompting) & Penyesuaian
+Selama pengerjaan, saya aktif bolak-balik konsultasi sama AI. Berikut contoh kendala yang saya tanyain dan cara saya nyesuaiin kodenya:
 
-* **Contoh Kasus 1: Input Kehadiran Massal**
-  * **Prompt Awal ke AI**: *"Tolong buatkan halaman input kehadiran massal untuk daftar siswa kelas XI-A3 yang terhubung ke Firebase Firestore."*
-  * **Hasil Awal AI**: AI memberikan fungsi dasar menggunakan perulangan *batch* Firestore dengan data siswa tiruan umum.
-  * **Penyesuaian Manual**: Pengembang menyesuaikan daftar nama dan nomor induk siswa (*NIS*) agar persis memuat 10 orang siswa riil kelas XI-A3, serta menambahkan indikator *loading* agar tombol tidak diklik ganda saat proses penyimpanan data berlangsung.
+* **Kasus 1: Bikin Form Absensi Massal**
+  * **Pertanyaan ke AI**: *"Tolong buatkan halaman input kehadiran massal untuk daftar siswa kelas XI-A3 yang terhubung ke Firebase Firestore."*
+  * **Hasil dari AI**: AI ngasih fungsi perulangan dasar dengan data dummy umum.
+  * **Penyesuaian Saya**: Saya ubah datanya supaya pas nampilin 10 siswa asli kelas XI-A3, terus saya tambahin tombol simpan supaya datanya beneran masuk ke database Firebase saya.
 
-* **Contoh Kasus 2: Navigasi Antar Halaman**
-  * **Prompt Awal ke AI**: *"Kenapa tombol navigasi bawah di beranda guru tidak bisa dipencet setelah diubah?"*
-  * **Hasil Awal AI**: AI memberikan penjelasan mengenai perubahan dari `StatelessWidget` ke `StatefulWidget` serta instruksi melakukan *Hot Restart*.
-  * **Penyesuaian Manual**: Pengembang menerapkan perubahan struktur kelas tersebut dan melakukan *Hot Restart* secara berkala untuk memastikan state perpindahan tab berjalan responsif.
+* **Kasus 2: Memperbaiki Navigasi Menu Detail Orang Tua**
+  * **Pertanyaan ke AI**: *"Kenapa menu informasi akademik di dashboard orang tua pas dipencet masih kosong/placeholder?"*
+  * **Hasil dari AI**: AI nyaranin buat misahin *class* baru khusus nampilin detail data akademik.
+  * **Penyesuaian Saya**: Saya terapin kodenya, terus saya isi *mock data* nilai dan kehadiran atas nama Syifa Nur R supaya waktu didemokan aplikasinya kelihatan hidup dan ada isinya.

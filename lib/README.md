@@ -1,27 +1,22 @@
-# EduBridge - Aplikasi Penghubung Sekolah, Guru, dan Orang Tua
+# EduBridge - Aplikasi Penghubung Sekolah & Orang Tua
 
-EduBridge adalah aplikasi berbasis mobile (Flutter) yang dirancang untuk memudahkan komunikasi dan pemantauan kegiatan akademik antara sekolah, guru, dan orang tua siswa, khususnya untuk kelas **XI-A3**.
+Halo! Proyek ini saya buat buat nyelesaiin tugas UTS mata kuliah pengembangan aplikasi mobile. **EduBridge** adalah aplikasi berbasis Flutter yang saya rancang untuk ngebantu komunikasi dan pemantauan kegiatan antara guru dan orang tua siswa, khususnya buat kelas **XI-A3**.
 
-## Fitur Utama
-* **Dashboard Guru**:
-  * Ringkasan total siswa (10 siswa kelas XI-A3).
-  * Input nilai akademik siswa terintegrasi Cloud Firestore.
-  * Input kehadiran massal untuk kelas XI-A3.
-  * Daftar nama siswa lengkap dengan NIS.
+## Fitur yang Udah Berhasil Dibuat
+* **Dashboard Guru**: 
+  * Nampilin daftar 10 siswa spesifik kelas XI-A3 lengkap sama NIS masing-masing.
+  * Fitur input nilai siswa yang udah terhubung langsung ke Firebase Firestore.
+  * Fitur absensi/kehadiran massal biar guru gak perlu ngecek satu-satu secara manual.
 * **Dashboard Orang Tua**:
-  * Tampilan antarmuka berbasis *gradient* yang interaktif.
-  * Pemantauan informasi akademik anak (Nilai, Kehadiran, Catatan Guru, dan Tagihan Sekolah).
+  * Tampilan *gradient* biru yang rapi dan interaktif khusus buat akun orang tua (diuji coba pakai data siswa atas nama *Syifa Nur R*).
+  * Menu informasi akademik lengkap yang bisa diklik buat ngecek Hasil Studi (nilai), Riwayat Kehadiran, Catatan dari Wali Kelas, sampai Tagihan Sekolah.
 
-## Tech Stack
-* **Framework**: Flutter (Dart)
+## Teknologi yang Digunakan
+* **Frontend**: Flutter (Dart)
 * **Backend & Database**: Firebase Authentication & Cloud Firestore
-* **Platform Target**: Web / Mobile
 
-## Tangkapan Layar (Screenshots)
-*(Silakan letakkan beberapa screenshot tampilan aplikasi di sini, atau buat folder assets/screenshots)*
-
-## Langkah Menjalankan Proyek
-1. Pastikan Flutter SDK sudah terinstal di komputer Anda.
-2. Clone repositori ini ke perangkat lokal:
+## Cara Menjalankan Aplikasi
+1. Clone dulu repository ini ke laptop kamu.
+2. Buka terminal di folder proyek, terus jalankan perintah:
    ```bash
-   git clone <url-repositori-anda>
+   flutter pub get

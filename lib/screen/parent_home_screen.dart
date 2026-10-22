@@ -119,7 +119,7 @@ class _KehadiranTab extends StatelessWidget {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('Kehadiran')
-          .orderBy('createdAt', descending: true)
+          .orderBy('tanggal', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

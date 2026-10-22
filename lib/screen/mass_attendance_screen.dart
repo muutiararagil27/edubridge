@@ -9,12 +9,18 @@ class MassAttendanceScreen extends StatefulWidget {
 }
 
 class _MassAttendanceScreenState extends State<MassAttendanceScreen> {
-  // Daftar nama siswa statis untuk keperluan demo UTS agar cepat
+  // Daftar 10 siswa yang disamakan dengan dashboard
   final List<Map<String, dynamic>> _students = [
-    {'nama': 'Syifa Nur R.', 'status': 'Hadir', 'keterangan': '-'},
-    {'nama': 'Anissa Vika A.', 'status': 'Hadir', 'keterangan': '-'},
-    {'nama': 'Budi Santoso', 'status': 'Hadir', 'keterangan': '-'},
-    {'nama': 'Dewi Lestari', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Anissa Vika', 'nis': '2413025005', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Anita Rahmawati', 'nis': '2413025013', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Khansa Nabila Hafish', 'nis': '2413025015', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Syifa Nur R', 'nis': '2413025019', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Elsa Susanti', 'nis': '2413025027', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Raehan', 'nis': '2413025033', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Selvia Alexandra', 'nis': '2413025025', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Shava Phiyan', 'nis': '2413025047', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Nur Istikomah', 'nis': '2413025053', 'status': 'Hadir', 'keterangan': '-'},
+    {'nama': 'Aulia Tri A', 'nis': '2413025073', 'status': 'Hadir', 'keterangan': '-'},
   ];
 
   bool _isLoading = false;
@@ -31,25 +37,25 @@ class _MassAttendanceScreenState extends State<MassAttendanceScreen> {
         final docRef = FirebaseFirestore.instance.collection('Kehadiran').doc();
         batch.set(docRef, {
           'siswaId': student['nama'],
+          'nis': student['nis'],
           'status': student['status'],
           'keterangan': student['keterangan'],
-          'tanggal': DateTime.now().toString(), // Menyimpan field tanggal
+          'tanggal': DateTime.now().toString(),
           'guruId': 'guru_terlogin',
-          'kelas': 'PTI 24 A',
+          'kelas': 'XI-A3',
         });
       }
 
-      // Jalankan proses simpan massal ke Firestore
       await batch.commit();
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Kehadiran seluruh siswa berhasil disimpan!'),
+          content: Text('Kehadiran seluruh siswa XI-A3 berhasil disimpan!'),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context); // Kembali ke dashboard setelah sukses
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,7 +79,7 @@ class _MassAttendanceScreenState extends State<MassAttendanceScreen> {
       backgroundColor: const Color(0xFFF5F7FB),
       appBar: AppBar(
         title: const Text(
-          'Input Kehadiran Kelas',
+          'Input Kehadiran XI-A3',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
@@ -98,7 +104,7 @@ class _MassAttendanceScreenState extends State<MassAttendanceScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _students[index]['nama'],
+                          '${_students[index]['nama']} (${_students[index]['nis']})',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,

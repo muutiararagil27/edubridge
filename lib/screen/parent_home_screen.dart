@@ -163,7 +163,75 @@ class _ParentDashboardView extends StatelessWidget {
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => _PlaceholderScreen(title: title)));
+          // Diarahkan langsung ke halaman detail isi data
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => _DetailInfoScreen(title: title),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _DetailInfoScreen extends StatelessWidget {
+  final String title;
+  const _DetailInfoScreen({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    List<Map<String, String>> details = [];
+
+    if (title.contains('Nilai')) {
+      details = [
+        {'sub': 'Matematika', 'val': '88 (A-)'},
+        {'sub': 'Bahasa Indonesia', 'val': '92 (A)'},
+        {'sub': 'Bahasa Inggris', 'val': '85 (B+)'},
+        {'sub': 'Ilmu Pengetahuan Alam', 'val': '90 (A)'},
+      ];
+    } else if (title.contains('Kehadiran')) {
+      details = [
+        {'sub': 'Senin, 20 Okt 2026', 'val': 'Hadir'},
+        {'sub': 'Selasa, 21 Okt 2026', 'val': 'Hadir'},
+        {'sub': 'Rabu, 22 Okt 2026', 'val': 'Hadir'},
+      ];
+    } else if (title.contains('Catatan')) {
+      details = [
+        {'sub': 'Wali Kelas (XI-A3)', 'val': 'Syifa aktif dan rajin mengikuti kegiatan diskusi kelas.'},
+      ];
+    } else {
+      details = [
+        {'sub': 'SPP Bulan Oktober', 'val': 'Lunas'},
+        {'sub': 'Uang Kegiatan', 'val': 'Lunas'},
+      ];
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FB),
+      appBar: AppBar(
+        title: Text(title, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: details.length,
+        itemBuilder: (context, index) {
+          return Card(
+            elevation: 0,
+            margin: const EdgeInsets.only(bottom: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              title: Text(details[index]['sub']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+              trailing: Text(
+                details[index]['val']!,
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2457C5), fontSize: 15),
+              ),
+            ),
+          );
         },
       ),
     );

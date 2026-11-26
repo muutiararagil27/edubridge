@@ -1,6 +1,17 @@
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'login_screen.dart';
+import '../guru_chat_page.dart';
+
+const Color primaryColor = Color(0xFF2457C5);
+const Color backgroundColor = Color(0xFFF5F7FB);
+
+// =====================================================
+// PARENT HOME SCREEN
+// =====================================================
 
 class ParentHomeScreen extends StatefulWidget {
   const ParentHomeScreen({super.key});
@@ -12,60 +23,99 @@ class ParentHomeScreen extends StatefulWidget {
 class _ParentHomeScreenState extends State<ParentHomeScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
+  late final List<Widget> _pages = [
     const _ParentDashboardView(),
-    const _PlaceholderScreen(title: 'Jadwal Pelajaran'),
-    const _PlaceholderScreen(title: 'Pesan / Chat Guru'),
-    const _PlaceholderScreen(title: 'Profil Orang Tua'),
+    const _ScheduleScreen(),
+    const GuruChatPage(),
+    const _ParentProfileScreen(),
   ];
+
+  Future<void> _logout() async {
+    await FirebaseAuth.instance.signOut();
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+      (route) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: backgroundColor,
+
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           'EduBridge',
-          style: TextStyle(color: Color(0xFF2457C5), fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.red),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              if (!context.mounted) return;
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginScreen()),
-              );
-            },
+            icon: const Icon(
+              Icons.logout,
+              color: Colors.red,
+            ),
+            onPressed: _logout,
           ),
-          const SizedBox(width: 8),
         ],
       ),
-      body: _pages[_selectedIndex],
+
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _pages,
+      ),
+
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
-        selectedItemColor: const Color(0xFF2457C5),
+        selectedItemColor: primaryColor,
         unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
         onTap: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_today_outlined), label: 'Jadwal'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profil'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
+            label: 'Beranda',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_outlined),
+            activeIcon: Icon(Icons.calendar_month),
+            label: 'Jadwal',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble_outline),
+            activeIcon: Icon(Icons.chat),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            activeIcon: Icon(Icons.person),
+            label: 'Profil',
+          ),
         ],
       ),
     );
   }
 }
+
+// =====================================================
+// DASHBOARD ORANG TUA
+// =====================================================
 
 class _ParentDashboardView extends StatelessWidget {
   const _ParentDashboardView();
@@ -75,99 +125,184 @@ class _ParentDashboardView extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text('Dashboard Orang Tua', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        const Text(
+          'Dashboard Orang Tua',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
         const SizedBox(height: 6),
-        const Text('Orang tua dari: Syifa Nur R (XI-A3)', style: TextStyle(color: Colors.black54, fontSize: 16)),
+
+        const Text(
+          'Selamat datang di EduBridge!',
+          style: TextStyle(color: Colors.black54),
+        ),
+
         const SizedBox(height: 24),
-        
+
+        // KARTU INFORMASI SISWA
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF2457C5), Color(0xFF4A7CEB)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+              colors: [
+                primaryColor,
+                Color(0xFF4A7CEB),
+              ],
             ),
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
-              BoxShadow(color: Colors.blue.withOpacity(0.2), blurRadius: 8, offset: const Offset(0, 4)),
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.15),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
-          child: Column(
+          child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  const CircleAvatar(
+                  CircleAvatar(
+                    radius: 25,
                     backgroundColor: Colors.white24,
-                    radius: 24,
-                    child: Icon(Icons.person, color: Colors.white, size: 28),
+                    child: Icon(
+                      Icons.school,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text('Syifa Nur R', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                        Text('NIS: 2413025019', style: TextStyle(color: Colors.white70)),
+                      children: [
+                        Text(
+                          'Syifa Nur R',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'NIS: 2413025019',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        Text(
+                          'Kelas XI-A3',
+                          style: TextStyle(color: Colors.white70),
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              const Text('Tingkat Kehadiran Bulan Ini: 100%', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(4),
-                child: const LinearProgressIndicator(value: 1.0, backgroundColor: Colors.white24, color: Colors.greenAccent, minHeight: 6),
+
+              SizedBox(height: 22),
+
+              Text(
+                'Pantau perkembangan akademik anak Anda melalui EduBridge.',
+                style: TextStyle(color: Colors.white),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
-        
-        const Text('Informasi Akademik', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
+        const SizedBox(height: 25),
+
+        const Text(
+          'Informasi Akademik',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
         const SizedBox(height: 14),
-        
-        _menuCard(
+
+        _dashboardMenu(
           context,
-          icon: Icons.assignment_turned_in_outlined, title: 'Hasil Studi (Nilai)', subtitle: 'Lihat nilai UTS dan rapor', color: Colors.blue,
+          icon: Icons.assignment_outlined,
+          title: 'Hasil Studi',
+          subtitle: 'Lihat informasi nilai siswa',
+          color: Colors.blue,
+          page: const _DetailInfoScreen(
+            title: 'Hasil Studi',
+          ),
         ),
-        _menuCard(
+
+        _dashboardMenu(
           context,
-          icon: Icons.event_available_outlined, title: 'Riwayat Kehadiran', subtitle: 'Pantau presensi harian Syifa', color: Colors.green,
+          icon: Icons.event_available_outlined,
+          title: 'Riwayat Kehadiran',
+          subtitle: 'Pantau kehadiran siswa',
+          color: Colors.green,
+          page: const _DetailInfoScreen(
+            title: 'Riwayat Kehadiran',
+          ),
         ),
-        _menuCard(
+
+        _dashboardMenu(
           context,
-          icon: Icons.notifications_active_outlined, title: 'Catatan Guru', subtitle: 'Pesan dan evaluasi dari wali kelas', color: Colors.orange,
+          icon: Icons.sticky_note_2_outlined,
+          title: 'Catatan Guru',
+          subtitle: 'Lihat catatan perkembangan siswa',
+          color: Colors.orange,
+          page: const _DetailInfoScreen(
+            title: 'Catatan Guru',
+          ),
         ),
-        _menuCard(
+
+        _dashboardMenu(
           context,
-          icon: Icons.account_balance_wallet_outlined, title: 'Tagihan Sekolah', subtitle: 'Informasi administrasi keuangan', color: Colors.purple,
+          icon: Icons.calendar_month_outlined,
+          title: 'Jadwal Pelajaran',
+          subtitle: 'Lihat jadwal kegiatan belajar',
+          color: Colors.purple,
+          page: const _ScheduleScreen(),
         ),
       ],
     );
   }
 
-  Widget _menuCard(BuildContext context, {required IconData icon, required String title, required String subtitle, required Color color}) {
+  Widget _dashboardMenu(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required Widget page,
+  }) {
     return Card(
       color: Colors.white,
       elevation: 0,
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
       child: ListTile(
         contentPadding: const EdgeInsets.all(12),
-        leading: CircleAvatar(backgroundColor: color.withOpacity(0.12), child: Icon(icon, color: color)),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+        leading: CircleAvatar(
+          backgroundColor: color.withOpacity(0.12),
+          child: Icon(icon, color: color),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          // Diarahkan langsung ke halaman detail isi data
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => _DetailInfoScreen(title: title),
+              builder: (_) => page,
             ),
           );
         },
@@ -176,60 +311,67 @@ class _ParentDashboardView extends StatelessWidget {
   }
 }
 
+// =====================================================
+// DETAIL INFORMASI AKADEMIK
+// =====================================================
+
 class _DetailInfoScreen extends StatelessWidget {
   final String title;
-  const _DetailInfoScreen({required this.title});
+
+  const _DetailInfoScreen({
+    required this.title,
+  });
 
   @override
   Widget build(BuildContext context) {
     List<Map<String, String>> details = [];
 
-    if (title.contains('Nilai')) {
+    if (title == 'Hasil Studi') {
       details = [
-        {'sub': 'Matematika', 'val': '88 (A-)'},
-        {'sub': 'Bahasa Indonesia', 'val': '92 (A)'},
-        {'sub': 'Bahasa Inggris', 'val': '85 (B+)'},
-        {'sub': 'Ilmu Pengetahuan Alam', 'val': '90 (A)'},
+        {'sub': 'Matematika', 'val': '88'},
+        {'sub': 'Bahasa Indonesia', 'val': '92'},
+        {'sub': 'Bahasa Inggris', 'val': '85'},
+        {'sub': 'Ilmu Pengetahuan Alam', 'val': '90'},
       ];
-    } else if (title.contains('Kehadiran')) {
+    } else if (title == 'Riwayat Kehadiran') {
       details = [
-        {'sub': 'Senin, 20 Okt 2026', 'val': 'Hadir'},
-        {'sub': 'Selasa, 21 Okt 2026', 'val': 'Hadir'},
-        {'sub': 'Rabu, 22 Okt 2026', 'val': 'Hadir'},
-      ];
-    } else if (title.contains('Catatan')) {
-      details = [
-        {'sub': 'Wali Kelas (XI-A3)', 'val': 'Syifa aktif dan rajin mengikuti kegiatan diskusi kelas.'},
+        {'sub': 'Senin, 20 Oktober 2026', 'val': 'Hadir'},
+        {'sub': 'Selasa, 21 Oktober 2026', 'val': 'Hadir'},
+        {'sub': 'Rabu, 22 Oktober 2026', 'val': 'Hadir'},
       ];
     } else {
       details = [
-        {'sub': 'SPP Bulan Oktober', 'val': 'Lunas'},
-        {'sub': 'Uang Kegiatan', 'val': 'Lunas'},
+        {
+          'sub': 'Catatan Wali Kelas',
+          'val': 'Syifa aktif dan rajin mengikuti kegiatan diskusi kelas.',
+        },
       ];
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text(title, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: Text(title),
         backgroundColor: Colors.white,
-        elevation: 1,
-        iconTheme: const IconThemeData(color: Colors.black),
+        foregroundColor: Colors.black,
+        elevation: 0,
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: details.length,
         itemBuilder: (context, index) {
           return Card(
+            color: Colors.white,
             elevation: 0,
             margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: ListTile(
-              title: Text(details[index]['sub']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-              trailing: Text(
-                details[index]['val']!,
-                style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF2457C5), fontSize: 15),
+              title: Text(
+                details[index]['sub']!,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              subtitle: Text(details[index]['val']!),
             ),
           );
         },
@@ -238,15 +380,445 @@ class _DetailInfoScreen extends StatelessWidget {
   }
 }
 
-class _PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const _PlaceholderScreen({required this.title});
+// =====================================================
+// JADWAL PELAJARAN
+// =====================================================
+
+class _ScheduleScreen extends StatelessWidget {
+  const _ScheduleScreen();
+
+  static const List<Map<String, String>> schedule = [
+    {
+      'hari': 'Senin',
+      'jam': '07.30 - 09.00',
+      'mapel': 'Matematika',
+      'guru': 'Guru Matematika',
+    },
+    {
+      'hari': 'Senin',
+      'jam': '09.15 - 10.45',
+      'mapel': 'Bahasa Indonesia',
+      'guru': 'Guru Bahasa Indonesia',
+    },
+    {
+      'hari': 'Selasa',
+      'jam': '07.30 - 09.00',
+      'mapel': 'Bahasa Inggris',
+      'guru': 'Guru Bahasa Inggris',
+    },
+    {
+      'hari': 'Selasa',
+      'jam': '09.15 - 10.45',
+      'mapel': 'IPA',
+      'guru': 'Guru IPA',
+    },
+    {
+      'hari': 'Rabu',
+      'jam': '07.30 - 09.00',
+      'mapel': 'Matematika',
+      'guru': 'Guru Matematika',
+    },
+    {
+      'hari': 'Kamis',
+      'jam': '07.30 - 09.00',
+      'mapel': 'Bahasa Indonesia',
+      'guru': 'Guru Bahasa Indonesia',
+    },
+    {
+      'hari': 'Jumat',
+      'jam': '07.30 - 09.00',
+      'mapel': 'Bahasa Inggris',
+      'guru': 'Guru Bahasa Inggris',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title), backgroundColor: Colors.white, foregroundColor: Colors.black),
-      body: Center(child: Text('Fitur $title akan segera hadir.', style: const TextStyle(fontSize: 16))),
+    const days = [
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+    ];
+
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        const Text(
+          'Jadwal Pelajaran',
+          style: TextStyle(
+            fontSize: 23,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        const Text(
+          'Jadwal kegiatan belajar siswa kelas XI-A3',
+          style: TextStyle(color: Colors.black54),
+        ),
+
+        const SizedBox(height: 20),
+
+        ...days.map((day) {
+          final dailySchedule = schedule
+              .where((item) => item['hari'] == day)
+              .toList();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                day,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              ...dailySchedule.map((item) {
+                return Card(
+                  color: Colors.white,
+                  elevation: 0,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFDCE7FF),
+                      child: Icon(
+                        Icons.menu_book,
+                        color: primaryColor,
+                      ),
+                    ),
+                    title: Text(
+                      item['mapel']!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(item['guru']!),
+                    trailing: Text(
+                      item['jam']!,
+                      style: const TextStyle(
+                        color: primaryColor,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 12),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+}
+
+// =====================================================
+// PROFIL ORANG TUA
+// =====================================================
+
+class _ParentProfileScreen extends StatelessWidget {
+  const _ParentProfileScreen();
+
+  Future<void> _editProfile(
+    BuildContext context,
+    String nama,
+    String telepon,
+  ) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) return;
+
+    final namaController = TextEditingController(text: nama);
+    final teleponController = TextEditingController(text: telepon);
+
+    try {
+      await showDialog(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: const Text('Edit Profil Orang Tua'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: namaController,
+                    decoration: const InputDecoration(
+                      labelText: 'Nama Lengkap',
+                      prefixIcon: Icon(Icons.person_outline),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextField(
+                    controller: teleponController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: 'Nomor Telepon',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('Batal'),
+              ),
+
+              ElevatedButton(
+                onPressed: () async {
+                  if (namaController.text.trim().isEmpty) return;
+
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('Users')
+                        .doc(user.uid)
+                        .set({
+                      'nama': namaController.text.trim(),
+                      'email': user.email,
+                      'noTelepon': teleponController.text.trim(),
+                      'role': 'orang_tua',
+                    }, SetOptions(merge: true));
+
+                    if (!dialogContext.mounted) return;
+
+                    Navigator.pop(dialogContext);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Profil berhasil diperbarui!',
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } catch (e) {
+                    if (!dialogContext.mounted) return;
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Gagal menyimpan profil: $e'),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Simpan'),
+              ),
+            ],
+          );
+        },
+      );
+    } finally {
+      namaController.dispose();
+      teleponController.dispose();
+    }
+  }
+
+  Widget _profileItem(
+    IconData icon,
+    String title,
+    String value,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: primaryColor,
+            size: 25,
+          ),
+
+          const SizedBox(width: 15),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Center(
+        child: Text('Pengguna belum login.'),
+      );
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .snapshots(),
+
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Gagal memuat profil: ${snapshot.error}',
+            ),
+          );
+        }
+
+        final data = snapshot.data?.data() ?? {};
+
+        final nama = data['nama']?.toString().isNotEmpty == true
+            ? data['nama'].toString()
+            : 'Orang Tua';
+
+        final telepon = data['noTelepon']?.toString() ?? '-';
+        final email = user.email ?? '-';
+
+        return ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const SizedBox(height: 20),
+
+            const Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 55,
+                    backgroundColor: Color(0xFFDCE7FF),
+                    child: Icon(
+                      Icons.person,
+                      size: 60,
+                      color: primaryColor,
+                    ),
+                  ),
+
+                  SizedBox(height: 15),
+
+                  Text(
+                    'Profil Orang Tua',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            const Text(
+              'Informasi Profil',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            _profileItem(
+              Icons.person_outline,
+              'Nama Lengkap',
+              nama,
+            ),
+
+            _profileItem(
+              Icons.email_outlined,
+              'Email',
+              email,
+            ),
+
+            _profileItem(
+              Icons.phone_outlined,
+              'Nomor Telepon',
+              telepon,
+            ),
+
+            _profileItem(
+              Icons.child_care,
+              'Nama Anak',
+              'Syifa Nur R',
+            ),
+
+            _profileItem(
+              Icons.school_outlined,
+              'Kelas',
+              'XI-A3',
+            ),
+
+            const SizedBox(height: 20),
+
+            SizedBox(
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  _editProfile(
+                    context,
+                    nama,
+                    telepon == '-' ? '' : telepon,
+                  );
+                },
+                icon: const Icon(Icons.edit),
+                label: const Text('Edit Profil'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

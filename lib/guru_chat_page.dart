@@ -7,17 +7,20 @@ class GuruChatPage extends StatelessWidget {
   const GuruChatPage({super.key});
 
   static const Color primaryColor = Color(0xFF2457C5);
+  static const Color backgroundColor = Color(0xFFF5F7FB);
 
   @override
   Widget build(BuildContext context) {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Center(child: Text('Silakan login terlebih dahulu.'));
+      return const Center(
+        child: Text('Silakan login terlebih dahulu.'),
+      );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FB),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text(
           'Chat Orang Tua',
@@ -35,25 +38,48 @@ class GuruChatPage extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(
-              child: Text('Gagal memuat daftar pengguna.'),
+            return _errorView(
+              'Gagal memuat daftar pengguna.',
+              snapshot.error,
             );
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (!snapshot.hasData) {
+            return const Center(
+              child: Text('Data pengguna tidak ditemukan.'),
+            );
           }
 
           final parents = snapshot.data!.docs.where((doc) {
             final data = doc.data();
+
             final role = (data['role'] ?? '')
                 .toString()
                 .toLowerCase()
-                .replaceAll(' ', '');
+                .replaceAll(' ', '')
+                .replaceAll('_', '')
+                .replaceAll('-', '');
 
             return doc.id != currentUser.uid &&
                 (role == 'orangtua' || role == 'parent');
           }).toList();
+
+          parents.sort((a, b) {
+            final namaA = (a.data()['nama'] ?? '')
+                .toString()
+                .toLowerCase();
+            final namaB = (b.data()['nama'] ?? '')
+                .toString()
+                .toLowerCase();
+
+            return namaA.compareTo(namaB);
+          });
 
           if (parents.isEmpty) {
             return const Center(
@@ -77,8 +103,8 @@ class GuruChatPage extends StatelessWidget {
                     ),
                     SizedBox(height: 6),
                     Text(
-                      'Daftar orang tua akan muncul di sini '
-                      'setelah akun mereka terdaftar.',
+                      'Akun orang tua akan muncul di sini '
+                      'setelah terdaftar di aplikasi.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey),
                     ),
@@ -95,7 +121,10 @@ class GuruChatPage extends StatelessWidget {
               final parent = parents[index];
               final data = parent.data();
 
-              final nama = data['nama']?.toString() ?? 'Orang Tua';
+              final nama = data['nama']?.toString().trim().isNotEmpty == true
+                  ? data['nama'].toString()
+                  : 'Orang Tua';
+
               final email = data['email']?.toString() ?? '';
 
               return Card(
@@ -104,6 +133,7 @@ class GuruChatPage extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
+                  side: BorderSide(color: Colors.grey.shade200),
                 ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
@@ -148,6 +178,41 @@ class GuruChatPage extends StatelessWidget {
       ),
     );
   }
+
+  static Widget _errorView(String title, Object? error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.red,
+              size: 45,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error.toString(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class ConversationPage extends StatefulWidget {
@@ -161,14 +226,16 @@ class ConversationPage extends StatefulWidget {
   });
 
   @override
-  State<ConversationPage> createState() => _ConversationPageState();
+  State<ConversationPage> createState() =>
+      _ConversationPageState();
 }
 
 class _ConversationPageState extends State<ConversationPage> {
   final TextEditingController _messageController =
       TextEditingController();
 
-  final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController =
+      ScrollController();
 
   static const Color primaryColor = Color(0xFF2457C5);
 
@@ -177,24 +244,35 @@ class _ConversationPageState extends State<ConversationPage> {
   String get conversationId {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final ids = [uid, widget.receiverId]..sort();
+
     return '${ids[0]}_${ids[1]}';
   }
 
+  // Mengirim pesan ke Firebase.
   Future<void> _sendMessage() async {
-    final text = _messageController.text.trim();
+    final message = _messageController.text.trim();
     final user = FirebaseAuth.instance.currentUser;
 
-    if (text.isEmpty || user == null || _sending) return;
+    if (message.isEmpty || user == null || _sending) {
+      return;
+    }
 
-    setState(() => _sending = true);
+    setState(() {
+      _sending = true;
+    });
 
     try {
-      await FirebaseFirestore.instance.collection('Messages').add({
+      await FirebaseFirestore.instance
+          .collection('Messages')
+          .add({
         'conversationId': conversationId,
-        'participants': [user.uid, widget.receiverId],
+        'participants': [
+          user.uid,
+          widget.receiverId,
+        ],
         'senderId': user.uid,
         'receiverId': widget.receiverId,
-        'isiPesan': text,
+        'isiPesan': message,
         'waktuKirim': FieldValue.serverTimestamp(),
         'statusBaca': false,
       });
@@ -203,12 +281,44 @@ class _ConversationPageState extends State<ConversationPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Pesan gagal dikirim: $e')),
+          SnackBar(
+            content: Text('Pesan gagal dikirim: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
-      if (mounted) setState(() => _sending = false);
+      if (mounted) {
+        setState(() {
+          _sending = false;
+        });
+      }
     }
+  }
+
+  // Mengurutkan pesan dari yang paling lama.
+  List<QueryDocumentSnapshot<Map<String, dynamic>>>
+      _sortMessages(
+    List<QueryDocumentSnapshot<Map<String, dynamic>>> docs,
+  ) {
+    final messages = [...docs];
+
+    messages.sort((a, b) {
+      final waktuA = a.data()['waktuKirim'];
+      final waktuB = b.data()['waktuKirim'];
+
+      final tanggalA = waktuA is Timestamp
+          ? waktuA.toDate()
+          : DateTime.fromMillisecondsSinceEpoch(0);
+
+      final tanggalB = waktuB is Timestamp
+          ? waktuB.toDate()
+          : DateTime.fromMillisecondsSinceEpoch(0);
+
+      return tanggalA.compareTo(tanggalB);
+    });
+
+    return messages;
   }
 
   @override
@@ -220,7 +330,15 @@ class _ConversationPageState extends State<ConversationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Silakan login kembali.'),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FB),
@@ -231,7 +349,10 @@ class _ConversationPageState extends State<ConversationPage> {
           children: [
             const CircleAvatar(
               backgroundColor: Colors.white,
-              child: Icon(Icons.person, color: primaryColor),
+              child: Icon(
+                Icons.person,
+                color: primaryColor,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -249,26 +370,65 @@ class _ConversationPageState extends State<ConversationPage> {
       body: Column(
         children: [
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+            child: StreamBuilder<
+                QuerySnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
                   .collection('Messages')
-                  .where('conversationId', isEqualTo: conversationId)
-                  .orderBy('waktuKirim')
+                  .where(
+                    'conversationId',
+                    isEqualTo: conversationId,
+                  )
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Gagal memuat percakapan.'),
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.red,
+                            size: 45,
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Gagal memuat percakapan.',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            snapshot.error.toString(),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
 
-                final messages = snapshot.data!.docs;
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: Text('Data percakapan tidak ditemukan.'),
+                  );
+                }
+
+                final messages =
+                    _sortMessages(snapshot.data!.docs);
 
                 if (messages.isEmpty) {
                   return const Center(
@@ -300,16 +460,20 @@ class _ConversationPageState extends State<ConversationPage> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final data = messages[index].data();
-                    final isMe = data['senderId'] == uid;
-                    final message = data['isiPesan']?.toString() ?? '';
 
-                    final timestamp = data['waktuKirim'] as Timestamp?;
+                    final isMe =
+                        data['senderId'] == user.uid;
 
-                    final time = timestamp == null
-                        ? ''
-                        : TimeOfDay.fromDateTime(
+                    final message =
+                        data['isiPesan']?.toString() ?? '';
+
+                    final timestamp = data['waktuKirim'];
+
+                    final time = timestamp is Timestamp
+                        ? TimeOfDay.fromDateTime(
                             timestamp.toDate(),
-                          ).format(context);
+                          ).format(context)
+                        : 'Mengirim...';
 
                     return Align(
                       alignment: isMe
@@ -317,24 +481,34 @@ class _ConversationPageState extends State<ConversationPage> {
                           : Alignment.centerLeft,
                       child: Container(
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.75,
+                          maxWidth:
+                              MediaQuery.of(context).size.width *
+                                  0.75,
                         ),
-                        margin: const EdgeInsets.only(bottom: 12),
+                        margin: const EdgeInsets.only(
+                          bottom: 12,
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 15,
                           vertical: 11,
                         ),
                         decoration: BoxDecoration(
-                          color: isMe ? primaryColor : Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          color: isMe
+                              ? primaryColor
+                              : Colors.white,
+                          borderRadius:
+                              BorderRadius.circular(16),
                         ),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.end,
                           children: [
                             Text(
                               message,
                               style: TextStyle(
-                                color: isMe ? Colors.white : Colors.black87,
+                                color: isMe
+                                    ? Colors.white
+                                    : Colors.black87,
                                 fontSize: 15,
                               ),
                             ),
@@ -357,8 +531,15 @@ class _ConversationPageState extends State<ConversationPage> {
               },
             ),
           ),
+
+          // Kolom untuk mengirim pesan.
           Container(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 15),
+            padding: const EdgeInsets.fromLTRB(
+              12,
+              10,
+              12,
+              15,
+            ),
             color: Colors.white,
             child: Row(
               children: [
@@ -367,17 +548,20 @@ class _ConversationPageState extends State<ConversationPage> {
                     controller: _messageController,
                     minLines: 1,
                     maxLines: 4,
-                    textCapitalization: TextCapitalization.sentences,
+                    textCapitalization:
+                        TextCapitalization.sentences,
                     decoration: InputDecoration(
                       hintText: 'Tulis pesan...',
                       filled: true,
                       fillColor: const Color(0xFFF1F3F8),
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding:
+                          const EdgeInsets.symmetric(
                         horizontal: 18,
                         vertical: 12,
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius:
+                            BorderRadius.circular(25),
                         borderSide: BorderSide.none,
                       ),
                     ),
@@ -388,7 +572,8 @@ class _ConversationPageState extends State<ConversationPage> {
                 CircleAvatar(
                   backgroundColor: primaryColor,
                   child: IconButton(
-                    onPressed: _sending ? null : _sendMessage,
+                    onPressed:
+                        _sending ? null : _sendMessage,
                     icon: _sending
                         ? const SizedBox(
                             width: 18,

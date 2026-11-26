@@ -5,6 +5,10 @@ import 'login_screen.dart';
 import 'grade_input_screen.dart';
 import 'mass_attendance_screen.dart';
 import 'report_screen.dart';
+import 'profile_screen.dart';
+import 'development_note_screen.dart';
+import '../guru_chat_page.dart';
+
 
 class TeacherHomeScreen extends StatefulWidget {
   const TeacherHomeScreen({super.key});
@@ -17,12 +21,12 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   int _selectedIndex = 0;
 
   // Daftar halaman untuk navigasi bawah
-  final List<Widget> _pages = [
-    const _DashboardView(),
-    const _StudentListView(),
-    const _PlaceholderScreen(title: 'Pesan / Chat'),
-    const _PlaceholderScreen(title: 'Profil Guru'),
-  ];
+ final List<Widget> _pages = [
+  const _DashboardView(),
+  const _StudentListView(),
+  const GuruChatPage(),
+  const ProfileScreen(),
+];
 
   @override
   Widget build(BuildContext context) {
@@ -159,9 +163,12 @@ class _DashboardView extends StatelessWidget {
           targetScreen: const MassAttendanceScreen(),
         ),
         _MenuCard(
-          icon: Icons.sticky_note_2_outlined, title: 'Catatan Perkembangan', subtitle: 'Tambahkan catatan perilaku siswa', color: Colors.orange,
-          targetScreen: const _PlaceholderScreen(title: 'Form Catatan Perkembangan'),
-        ),
+  icon: Icons.sticky_note_2_outlined,
+  title: 'Catatan Perkembangan',
+  subtitle: 'Tambahkan catatan perilaku siswa',
+  color: Colors.orange,
+  targetScreen: const DevelopmentNoteScreen(),
+),
         _MenuCard(
           icon: Icons.bar_chart, title: 'Laporan Siswa', subtitle: 'Lihat ringkasan perkembangan siswa', color: Colors.purple,
           targetScreen: const ReportScreen(),
